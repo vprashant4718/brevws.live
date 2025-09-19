@@ -28,16 +28,30 @@
 
 
 import { Stack } from "expo-router";
+import { useColorScheme } from "nativewind";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ThemeToggle from "../components/themeToggle";
 import "../global.css";
 export default function RootLayout() {
+  const { colorScheme } = useColorScheme();
+
     return (
     <SafeAreaProvider>
         <StatusBar barStyle="light-content" />
         
-          <Stack initialRouteName="Home"  screenOptions={{headerShown:true, headerRight: () => <ThemeToggle />, tabBarActiveTintColor: 'rgb(233 89 0)', tabBarInactiveTintColor: 'gray',  tabBarStyle: { paddingBottom:'20%', paddingTop:'10%',  backgroundColor: 'black' }, tabBarLabelStyle:{ fontSize: 14, fontWeight: 'bold'  }}} />
+           <Stack 
+        screenOptions={{
+          headerTitle: "",
+          headerStyle: {
+            backgroundColor: colorScheme === "dark" ? "#000000" : "#ffffff", // dark:bg-gray-800
+          },
+          headerTintColor: colorScheme === "dark" ? "#ffffff" : "#000000",
+          headerTitleStyle: {
+            color: colorScheme === "dark" ? "#ffffff" : "#000000",
+          },
+          headerRight: () => <ThemeToggle />,
+        }}/>
     </SafeAreaProvider>
   );
 }

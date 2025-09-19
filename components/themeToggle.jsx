@@ -1,5 +1,6 @@
+import AntDesign from "@expo/vector-icons/AntDesign";
 import { useColorScheme } from "nativewind";
-import { Text, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 
 export default function ThemeToggle() {
   const { colorScheme, toggleColorScheme } = useColorScheme();
@@ -7,11 +8,13 @@ export default function ThemeToggle() {
   return (
     <TouchableOpacity
       onPress={toggleColorScheme}
-      className="px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700"
+      className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
     >
-      <Ant
-        {colorScheme === "dark" ? "☀️ light" : "🌙 Dark"}
-      </Text>
+      <AntDesign
+        name={colorScheme === "dark" ? "sun" : "moon"}
+        size={22}
+        color={colorScheme === "dark" ? "white" : "black"}
+      />
     </TouchableOpacity>
   );
 }

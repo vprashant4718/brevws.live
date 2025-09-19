@@ -7,15 +7,10 @@ export default function Index() {
   return (
     <View
       className={ " flex-1 items-center justify-center px-6 dark:bg-black" } >
-      {/* Theme Toggle */}
-      {/* <View className="absolute top-12 right-6 p-4 border-gray-400 rounded-md">
-        
-        <AntDesign name={darkMode === true? "sun" : "moon"} size={24} color={ darkMode === true ? 'white' : "black"} onPress={() => setDarkMode(!darkMode)}/>
-        
-      </View> */}
+     
 
       {/* Logo */}
-      <View className="flex-1 items-center justify-center flex-col mt-48">
+      <View className="flex-1 items-center justify-center flex-col mt-24">
         <Image
           source={logo}
           className="w-60 h-60 rounded-2xl"

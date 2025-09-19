@@ -190,7 +190,7 @@ export default function InvoicePage() {
 
 
   return (
-    <View className="flex-1 bg-white pt-20 dark:bg-black">
+    <View className="flex-1 bg-white pt-4 dark:bg-black">
     <ScrollView
       className="flex-1 bg-white w-full dark:bg-black"
       contentContainerStyle={{ padding: 20 }}
@@ -442,7 +442,7 @@ export default function InvoicePage() {
                     keyboardType="numeric"
                   />
                 </View>
-                <View className="w-[48%] bg-purple-100 p-3 mt-5 rounded-lg mb-3">
+                <View className="w-[48%] bg-purple-100 p-3 mt-6 rounded-lg mb-3">
                   <Text className="text-purple-700 font-semibold">
                     Total: {currency} {item.total}
                   </Text>
