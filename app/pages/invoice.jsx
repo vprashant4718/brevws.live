@@ -1,14 +1,18 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
+import * as FileSystem from "expo-file-system/legacy";
+import * as MediaLibrary from "expo-media-library";
+import * as Print from "expo-print";
 import { useState } from "react";
 import {
-    Image,
-    Modal,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
@@ -72,17 +76,127 @@ export default function InvoicePage() {
     console.log("Preview Invoice:", { currency, items, notes });
   };
 
-  const downloadPDF = () => {
-    console.log("Download as PDF:", { currency, items, notes });
-  };
+  const downloadPDF = async() => {
+    // console.log("Download as PDF:", { currency, items, notes });
+      try {
+    const html = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { text-align: left; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+            th { background: #f0f0f0; }
+            .totals { margin-top: 20px; text-align: right; }
+          </style>
+        </head>
+        <body>
+          <h1>Invoice</h1>
+          <p><b>Invoice #:</b> ${invoiceNumber || "INV-001"}</p>
+          <p><b>Date:</b> ${issueDate.toDateString()}</p>
+          <p><b>Due Date:</b> ${dueDate.toDateString()}</p>
+
+          <h3>From:</h3>
+          <p>${businessName || "Your Business Name"}<br>
+             ${businessEmail || "your@email.com"}<br>
+             ${businessAddress || "Your Business Address"}</p>
+
+          <h3>Bill To:</h3>
+          <p>${clientName || "Client Name"}<br>
+             ${clientEmail || "client@email.com"}<br>
+             ${clientAddress || "Client Address"}</p>
+
+          <table>
+            <tr>
+              <th>Description</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Tax %</th>
+              <th>Amount</th>
+            </tr>
+            ${items
+              .map(
+                (it) => `
+                <tr>
+                  <td>${it.description}</td>
+                  <td>${it.quantity}</td>
+                  <td>${currency} ${it.price}</td>
+                  <td>${it.tax}%</td>
+                  <td>${currency} ${it.total}</td>
+                </tr>`
+              )
+              .join("")}
+          </table>
+
+          <div class="totals">
+            <p><b>Subtotal:</b> ${currency} ${items
+              .reduce(
+                (sum, it) =>
+                  sum + parseFloat(it.price || 0) * parseFloat(it.quantity || 0),
+                0
+              )
+              .toFixed(2)}</p>
+            <p><b>Tax:</b> ${currency} ${items
+              .reduce(
+                (sum, it) =>
+                  sum +
+                  (parseFloat(it.price || 0) *
+                    parseFloat(it.quantity || 0) *
+                    (parseFloat(it.tax || 0) / 100)),
+                0
+              )
+              .toFixed(2)}</p>
+            <hr />
+            <h2>Total: ${currency} ${items
+              .reduce((sum, it) => sum + parseFloat(it.total || 0), 0)
+              .toFixed(2)}</h2>
+          </div>
+        </body>
+      </html>
+    `;
+
+   const { uri } = await Print.printToFileAsync({ html });
+
+    const pdfName = `Invoice_${invoiceNumber || "INV-001"}.pdf`;
+    const newPath = FileSystem.documentDirectory + pdfName;
+
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+  if (status === "granted") {
+    const asset = await MediaLibrary.createAssetAsync(newPath);
+    await MediaLibrary.createAlbumAsync("Download", asset, false);
+    alert("PDF saved to Downloads!");
+  } else {
+    alert("Permission denied. Cannot save PDF.");
+  }
+
+
+
+    await FileSystem.copyAsync({ from: uri, to: newPath });
+
+    // Open the file immediately (if device supports)
+  //   if (await Sharing.isAvailableAsync()) {
+  //     await Sharing.shareAsync(newPath);
+  //   } else {
+  //     alert(`PDF saved at: ${newPath}`);
+  //   }
+  } catch (error) {
+    console.error("PDF save error:", error);
+  }
+};
+
+
+
+
 
   return (
+    <View className="flex-1 bg-white pt-20 dark:bg-black">
     <ScrollView
       className="flex-1 bg-white w-full dark:bg-black"
       contentContainerStyle={{ padding: 20 }}
     >
       {/* Header Section */}
-      { step === 1 || step === 2 || step === 6 &&<View className="flex-row items-center mb-20 mt-32 bg-white rounded-xl p-4 shadow">
+      { (step === 1 || step === 2 || step === 3) &&<View className="flex-row items-center mb-6 mt-6 bg-white rounded-xl p-4 shadow">
         <Icon
           name="file-document-outline"
           size={30}
@@ -113,6 +227,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter business name"
+            placeholderTextColor={"#9CA3AF"}
             value={businessName}
             onChangeText={setBusinessName}
           />
@@ -122,6 +237,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter business Email"
+            placeholderTextColor={"#9CA3AF"}
             value={businessEmail}
             onChangeText={setBusinessEmail}
           />
@@ -132,6 +248,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter business address"
+            placeholderTextColor={"#9CA3AF"}
             value={businessAddress}
             onChangeText={setBusinessAddress}
             
@@ -151,6 +268,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter client name"
+            placeholderTextColor={"#9CA3AF"}
             value={clientName}
             onChangeText={setClientName}
           />
@@ -161,6 +279,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter client email"
+            placeholderTextColor={"#9CA3AF"}
             value={clientEmail}
             onChangeText={setClientEmail}
           />
@@ -170,6 +289,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter client Address"
+            placeholderTextColor={"#9CA3AF"}
             value={clientAddress}
             onChangeText={setClientAddress}
           />
@@ -188,11 +308,12 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Enter invoice number"
+            placeholderTextColor={"#9CA3AF"}
             value={invoiceNumber}
             onChangeText={setInvoiceNumber}
           />
 
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.7}
             onPress={() => {
               setPickerField("issue");
               setShowPicker(true);
@@ -204,7 +325,7 @@ export default function InvoicePage() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.7}
             onPress={() => {
               setPickerField("due");
               setShowPicker(true);
@@ -236,9 +357,9 @@ export default function InvoicePage() {
 
       {/* STEP 4: Items */}
       {step === 4 && (
-        <View className="mb-20">
+        <View className="mb-10">
           {/* Currency */}
-          <Text className="text-xl text-center font-semibold mb-8 dark:text-white">
+          <Text className="text-3xl text-center font-semibold mb-4 dark:text-white">
             Items
           </Text> 
           <Text className="text-lg font-semibold mb-2 dark:text-white">
@@ -248,7 +369,7 @@ export default function InvoicePage() {
             <Picker
               selectedValue={currency}
               onValueChange={(val) => setCurrency(val)}
-              style={{ height: 50 }}
+              style={{ height: 50, color: 'white'}} // Ensure text is visible in dark mode
             >
               <Picker.Item label="INR (₹)" value="INR" />
               <Picker.Item label="USD ($)" value="USD" />
@@ -258,11 +379,11 @@ export default function InvoicePage() {
           </View>
 
           {/* Add Item Button */}
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.7}
             onPress={addItem}
-            className="border border-dashed border-purple-600 py-3 rounded-lg mb-4"
+            className="border border-solid border-green-600 py-3 bg-green-600 rounded-lg mb-4"
           >
-            <Text className="text-purple-700 font-semibold text-center">
+            <Text className="text-white font-semibold text-center">
               + Add Item
             </Text>
           </TouchableOpacity>
@@ -273,10 +394,11 @@ export default function InvoicePage() {
               key={index}
               className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mb-4 shadow-sm"
             >
-                <Text className='font-semibold text-sm mb-1'>Description:</Text>
+                <Text className='font-semibold text-sm mb-2 dark:text-white'>Description:</Text>
               <TextInput
                 className="border p-3 rounded-lg mb-3 dark:text-white dark:border-gray-600"
                 placeholder="Description"
+                placeholderTextColor={"#9CA3AF"}
                 value={item.description}
                 onChangeText={(text) => updateItem(index, "description", text)}
               />
@@ -284,20 +406,22 @@ export default function InvoicePage() {
               {/* Quantity + Price */}
               <View className="flex-row justify-between">
                 <View className="w-[48%]">
-                    <Text className='font-semibold text-sm mb-1'>Quantity:</Text>
+                    <Text className='font-semibold text-sm mb-1 dark:text-white'>Quantity:</Text>
                   <TextInput
                     className="border p-3 rounded-lg mb-3 dark:text-white dark:border-gray-600"
                     placeholder="Quantity"
+                    placeholderTextColor={"#9CA3AF"}
                     value={item.quantity}
                     onChangeText={(text) => updateItem(index, "quantity", text)}
                     keyboardType="numeric"
                   />
                 </View>
                 <View className="w-[48%]">
-                    <Text className='font-semibold text-sm mb-1'>Price:</Text>
+                    <Text className='font-semibold text-sm mb-1 dark:text-white'>Price:</Text>
                   <TextInput
                     className="border p-3 rounded-lg mb-3 dark:text-white dark:border-gray-600"
                     placeholder="Price"
+                    placeholderTextColor={"#9CA3AF"}
                     value={item.price}
                     onChangeText={(text) => updateItem(index, "price", text)}
                     keyboardType="numeric"
@@ -308,16 +432,17 @@ export default function InvoicePage() {
               {/* Tax + Total */}
               <View className="flex-row justify-between items-center">
                 <View className="w-[48%]">
-                    <Text className='font-semibold text-sm mb-1'>Tax(%):</Text>
+                    <Text className='font-semibold text-sm mb-1 dark:text-white'>Tax(%):</Text>
                   <TextInput
                     className="border p-3 rounded-lg mb-3 dark:text-white dark:border-gray-600"
                     placeholder="Tax %"
+                    placeholderTextColor={"#9CA3AF"}
                     value={item.tax}
                     onChangeText={(text) => updateItem(index, "tax", text)}
                     keyboardType="numeric"
                   />
                 </View>
-                <View className="w-[48%] bg-purple-100 p-3 rounded-lg mb-3">
+                <View className="w-[48%] bg-purple-100 p-3 mt-5 rounded-lg mb-3">
                   <Text className="text-purple-700 font-semibold">
                     Total: {currency} {item.total}
                   </Text>
@@ -325,7 +450,7 @@ export default function InvoicePage() {
               </View>
 
               {/* Delete Item Button */}
-              <TouchableOpacity
+              <TouchableOpacity activeOpacity={0.7}
                 onPress={() => deleteItem(index)}
                 className="bg-red-500 py-3 rounded-lg"
               >
@@ -343,6 +468,7 @@ export default function InvoicePage() {
           <TextInput
             className="border p-3 rounded-lg mb-4 dark:text-white dark:border-gray-600"
             placeholder="Payment terms, thank you message, etc."
+            placeholderTextColor={"#9CA3AF"}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -350,42 +476,43 @@ export default function InvoicePage() {
 
           {/* Buttons */}
           <View className="flex-row justify-between mt-6">
-            {/* <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.7}
               className="bg-gray-400 px-6 py-4 rounded-lg"
               onPress={prevStep}
             >
               <Text className="text-white font-semibold">Back</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
 
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.7}
               className="bg-blue-600 px-6 py-4 rounded-lg"
               onPress={() => setModalVisible(true)}
             >
-              <Text className="text-white font-semibold">Preview</Text>
+              <Text className="text-white font-semibold items-center"><AntDesign name="eye" size={18} color="white" /> Preview</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            <TouchableOpacity activeOpacity={0.7}
               className="bg-purple-700 px-6 py-4 rounded-lg"
               onPress={downloadPDF}
             >
-              <Text className="text-white font-semibold">Download PDF</Text>
+              <Text className="text-white font-semibold"><AntDesign name="download" size={18} color="white" /> Download</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
       {/* Navigation Buttons */}
-      <View className="flex-row justify-between mt-6">
-        {step > 1 && (
-          <TouchableOpacity
+      <View className="flex-row justify-between ">
+        {(step > 1  && step < 4) && (
+          <TouchableOpacity activeOpacity={0.7}
             className="bg-gray-400 px-6 py-3 rounded-lg"
             onPress={prevStep}
           >
             <Text className="text-white font-semibold">Back</Text>
           </TouchableOpacity>
-        )}
+        ) }
+
         {step < 4 && (
-          <TouchableOpacity
+          <TouchableOpacity activeOpacity={0.7}
             className="bg-purple-700 px-6 py-3 rounded-lg ml-auto"
             onPress={nextStep}
           >
@@ -394,7 +521,7 @@ export default function InvoicePage() {
         )}
       </View>
 
-      <Text className="text-xl font-bold text-center  mt-6 dark:text-white">
+      <Text className="text-xl font-bold text-center   dark:text-white">
         Step {step} of 4
       </Text>
 
@@ -513,7 +640,7 @@ export default function InvoicePage() {
       </ScrollView>
 
       {/* Close Button */}
-      <TouchableOpacity
+      <TouchableOpacity  activeOpacity={0.7}
         onPress={() => setModalVisible(false)}
         className="bg-red-500 mt-6 py-3 rounded-lg"
       >
@@ -524,5 +651,6 @@ export default function InvoicePage() {
 </Modal>
 
     </ScrollView>
+  </View>
   );
 }
