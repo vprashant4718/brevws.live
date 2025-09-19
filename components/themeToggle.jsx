@@ -7,10 +7,10 @@ export default function ThemeToggle() {
   return (
     <TouchableOpacity
       onPress={toggleColorScheme}
-      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800"
+      className="px-3 py-1 rounded-lg bg-gray-200 dark:bg-gray-700"
     >
-      <Text className="text-black dark:text-white">
-        {colorScheme === "dark" ? "☀️ Light" : "🌙 Dark"}
+      <Ant
+        {colorScheme === "dark" ? "☀️ light" : "🌙 Dark"}
       </Text>
     </TouchableOpacity>
   );

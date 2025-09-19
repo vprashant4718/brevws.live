@@ -1,25 +1,18 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import logo from "../assets/images/brewvs.png";
-export default function Index() {
-  const [darkMode, setDarkMode] = useState(false);
+export default function Index() { 
 
   return (
     <View
-      className={
-        darkMode
-          ? "bg-black flex-1 items-center justify-center px-6"
-          : "bg-white flex-1 items-center justify-center px-6"
-      }
-    >
+      className={ " flex-1 items-center justify-center px-6 dark:bg-black" } >
       {/* Theme Toggle */}
-      <View className="absolute top-12 right-6 p-4 border-gray-400 rounded-md">
+      {/* <View className="absolute top-12 right-6 p-4 border-gray-400 rounded-md">
         
         <AntDesign name={darkMode === true? "sun" : "moon"} size={24} color={ darkMode === true ? 'white' : "black"} onPress={() => setDarkMode(!darkMode)}/>
         
-      </View>
+      </View> */}
 
       {/* Logo */}
       <View className="flex-1 items-center justify-center flex-col mt-48">
@@ -31,18 +24,14 @@ export default function Index() {
 
         {/* Company Name */}
         <Text
-          className={`text-7xl font-bold mb-2 -mt-8 ${
-            darkMode ? "text-white" : "text-black"
-          }`}
+          className={`text-7xl font-bold mb-2 -mt-8 dark:text-white `}
         >
           Brevws
         </Text>
 
         {/* Tagline */}
         <Text
-          className={`text-base mb-8 text-center ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`text-base mb-8 text-center dark:text-white`}
         >
           Create Professional Invoices in Minutes
         </Text>
@@ -62,9 +51,7 @@ export default function Index() {
 
         {/* Footer Text */}
         <Text
-          className={`absolute mt-24 text-xs ${
-            darkMode ? "text-gray-300" : "text-gray-600"
-          }`}
+          className={`absolute mt-24 text-xs dark:text-white`}
         >
           Free Invoice Generator – No signup needed
         </Text>

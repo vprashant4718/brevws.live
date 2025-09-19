@@ -196,7 +196,7 @@ export default function InvoicePage() {
       contentContainerStyle={{ padding: 20 }}
     >
       {/* Header Section */}
-      { (step === 1 || step === 2 || step === 3) &&<View className="flex-row items-center mb-6 mt-6 bg-white rounded-xl p-4 shadow">
+      { (step === 1 || step === 2 || step === 3) &&<View className="flex-row items-center mb-6 mt-6 bg-white rounded-xl p-4 shadow-md dark:bg-gray-800">
         <Icon
           name="file-document-outline"
           size={30}
@@ -204,7 +204,7 @@ export default function InvoicePage() {
           className="mr-3"
         />
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-800">
+          <Text className="text-lg font-semibold text-gray-800 dark:text-white">
             Create Your Professional{" "}
             <Text className="text-purple-600">Invoice</Text> with our free{" "}
             <Text className="text-purple-600">Invoice Template</Text>
