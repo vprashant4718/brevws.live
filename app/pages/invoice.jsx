@@ -313,6 +313,9 @@ export default function InvoicePage() {
             onChangeText={setInvoiceNumber}
           />
 
+        <Text className="text-lg font-semibold mb-2 dark:text-white">
+            Choose Issue Date
+          </Text>
           <TouchableOpacity activeOpacity={0.7}
             onPress={() => {
               setPickerField("issue");
@@ -321,10 +324,12 @@ export default function InvoicePage() {
             className="border p-3 rounded-lg mb-4 dark:border-gray-600"
           >
             <Text className="dark:text-white">
-              Issue Date: {issueDate.toDateString()}
+              {issueDate.toDateString()}
             </Text>
           </TouchableOpacity>
-
+            <Text className="text-lg font-semibold mb-2 dark:text-white">
+            Choose Due Date
+          </Text>
           <TouchableOpacity activeOpacity={0.7}
             onPress={() => {
               setPickerField("due");
@@ -333,7 +338,7 @@ export default function InvoicePage() {
             className="border p-3 rounded-lg mb-4 dark:border-gray-600"
           >
             <Text className="dark:text-white">
-              Due Date: {dueDate.toDateString()}
+              {dueDate.toDateString()}
             </Text>
           </TouchableOpacity>
 

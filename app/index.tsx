@@ -6,7 +6,7 @@ export default function Index() {
 
   return (
     <View
-      className={ " flex-1 items-center justify-center px-6 dark:bg-black" } >
+      className={ " flex-1 items-center justify-center px-6 bg-white dark:bg-black" } >
      
 
       {/* Logo */}
